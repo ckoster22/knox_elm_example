@@ -5,6 +5,7 @@ import Html.Attributes exposing (style, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Decode
+import SortedLabels exposing (SortedLabels, asList, ascendingLabels, descendingLabels)
 
 
 main : Program Never Model Msg
@@ -40,13 +41,13 @@ type alias UserInputModel =
 
 
 type alias LabelData =
-    RemoteData (List String) String
+    RemoteData SortedLabels String
 
 
 type Msg
     = TypeInput String
     | Retrieve
-    | RetrieveSuccess (List String)
+    | RetrieveSuccess SortedLabels
     | RetrieveError String
 
 
@@ -90,7 +91,7 @@ resultsView labelData =
             div [] [ text "Please wait.." ]
 
         Success results ->
-            ul [] <| List.map resultListItem results
+            ul [] <| List.map resultListItem <| asList results
 
         Failure error ->
             div [] [ text error ]
@@ -136,7 +137,7 @@ update msg model =
                 |> noMsg
 
         RetrieveSuccess results ->
-            if List.length results == 0 then
+            if List.length (asList results) == 0 then
                 { model | labelData = ZeroState }
                     |> noMsg
             else
@@ -160,7 +161,7 @@ resultToMsg result =
         Ok decodedResult ->
             case decodedResult of
                 Ok result ->
-                    RetrieveSuccess result
+                    RetrieveSuccess <| ascendingLabels result
 
                 Err error ->
                     RetrieveError error

@@ -1,4 +1,4 @@
-module SortedLabels exposing (SortDirection(..), SortedLabels, asList)
+module SortedLabels exposing (SortedLabels, asList, ascendingLabels, descendingLabels)
 
 {-
    A type for sorted lists of strings
@@ -8,10 +8,8 @@ module SortedLabels exposing (SortDirection(..), SortedLabels, asList)
 -}
 
 
-type alias SortedLabels =
-    { labels : List String
-    , direction : SortDirection
-    }
+type SortedLabels
+    = SortedLabels (List String) SortDirection
 
 
 type SortDirection
@@ -19,13 +17,23 @@ type SortDirection
     | Desc
 
 
+ascendingLabels : List String -> SortedLabels
+ascendingLabels labels =
+    SortedLabels labels Asc
+
+
+descendingLabels : List String -> SortedLabels
+descendingLabels labels =
+    SortedLabels labels Desc
+
+
 asList : SortedLabels -> List String
 asList sortedLabels =
-    case sortedLabels.direction of
-        Asc ->
-            List.sort sortedLabels.labels
+    case sortedLabels of
+        SortedLabels labels Asc ->
+            List.sort labels
 
-        Desc ->
-            sortedLabels.labels
+        SortedLabels labels Desc ->
+            labels
                 |> List.sort
                 |> List.reverse
