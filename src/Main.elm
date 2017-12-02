@@ -21,6 +21,14 @@ main =
 -- Types
 
 
+type RemoteData a b
+    = Initial
+    | Retrieving
+    | Success a
+    | Failure b -- Based on Kris Jenkins' remote data package
+    | ZeroState
+
+
 type alias Model =
     { userInput : UserInputModel
     , labelData : LabelData
@@ -32,10 +40,7 @@ type alias UserInputModel =
 
 
 type alias LabelData =
-    { isRetrieving : Bool
-    , retrievalError : Maybe String
-    , results : List String
-    }
+    RemoteData (List String) String
 
 
 type Msg
@@ -47,17 +52,7 @@ type Msg
 
 init : ( Model, Cmd Msg )
 init =
-    let
-        initialUserInputModel =
-            UserInputModel ""
-
-        initialLabelData =
-            LabelData False Nothing []
-
-        initialModel =
-            Model initialUserInputModel initialLabelData
-    in
-    initialModel ! []
+    Model (UserInputModel "") Initial ! []
 
 
 
@@ -87,17 +82,21 @@ formView { repo } =
 
 resultsView : LabelData -> Html Msg
 resultsView labelData =
-    if labelData.isRetrieving then
-        div [] [ text "Please wait.." ]
-    else if labelData.retrievalError /= Nothing then
-        case labelData.retrievalError of
-            Just error ->
-                div [] [ text error ]
+    case labelData of
+        Initial ->
+            div [] [ text "Please enter a github repo in the format of \"account/repoName\"" ]
 
-            Nothing ->
-                div [] []
-    else
-        ul [] <| List.map resultListItem labelData.results
+        Retrieving ->
+            div [] [ text "Please wait.." ]
+
+        Success results ->
+            ul [] <| List.map resultListItem results
+
+        Failure error ->
+            div [] [ text error ]
+
+        ZeroState ->
+            div [] [ text "There aren't any labels for this github repository!" ]
 
 
 resultListItem : String -> Html Msg
@@ -129,57 +128,20 @@ update msg model =
                 |> noMsg
 
         Retrieve ->
-            model
-                |> setIsRetrieving True
+            { model | labelData = Retrieving }
                 |> andMsg (fetchRepos model.userInput)
 
         RetrieveError error ->
-            model
-                |> setIsRetrieving False
-                |> setError (Just error)
+            { model | labelData = Failure error }
                 |> noMsg
 
         RetrieveSuccess results ->
-            model
-                |> setIsRetrieving False
-                |> setResults results
-                |> noMsg
-
-
-setIsRetrieving : Bool -> Model -> Model
-setIsRetrieving isRetrieving model =
-    let
-        labelData =
-            model.labelData
-
-        updatedLabelData =
-            { labelData | isRetrieving = isRetrieving }
-    in
-    { model | labelData = updatedLabelData }
-
-
-setError : Maybe String -> Model -> Model
-setError error model =
-    let
-        labelData =
-            model.labelData
-
-        updatedLabelData =
-            { labelData | retrievalError = error }
-    in
-    { model | labelData = updatedLabelData }
-
-
-setResults : List String -> Model -> Model
-setResults results model =
-    let
-        labelData =
-            model.labelData
-
-        updatedLabelData =
-            { labelData | results = results }
-    in
-    { model | labelData = updatedLabelData }
+            if List.length results == 0 then
+                { model | labelData = ZeroState }
+                    |> noMsg
+            else
+                { model | labelData = Success results }
+                    |> noMsg
 
 
 
