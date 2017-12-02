@@ -1,6 +1,6 @@
 {
     "version": "1.0.0",
-    "summary": "helpful summary of your project, less than 80 characters",
+    "summary": "An Elm example given at the Functional Knox Meetup",
     "repository": "https://github.com/ckoster22/knox_elm_example.git",
     "license": "BSD3",
     "source-directories": [
