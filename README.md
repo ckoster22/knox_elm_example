@@ -4,10 +4,10 @@ Download elm
 
 Install dependencies
 
-`elm-package install -y`
+`elm package install -y`
 
 Run the app
 
-`elm-reactor`
+`elm reactor`
 
 Navigate to http://localhost:8000
