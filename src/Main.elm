@@ -1,7 +1,7 @@
 module Main exposing (main)
 
 import Html exposing (Html, button, div, fieldset, input, li, span, text, ul)
-import Html.Attributes exposing (style, type_, value)
+import Html.Attributes exposing (class, style, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Decode
@@ -67,7 +67,7 @@ init =
 view : Model -> Html Msg
 view model =
     div
-        []
+        [ class "exampleFieldset" ]
         [ formView model.userInput
         , button [ onClick Retrieve ] [ text "Search" ]
         , resultsView model.labelData

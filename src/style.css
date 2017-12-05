@@ -8,3 +8,11 @@ li {
     margin: 0px 8px;
     border: 1px solid #D8D8D8;
 }
+.exampleFieldset {
+    width: 50%;
+    padding-top: 10%;
+    margin-left: 25%;
+}
+button {
+    margin-top: 8px;
+}
